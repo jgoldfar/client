@@ -32,6 +32,19 @@ export default () => {
           shouldShowSFMIBanner={false}
           resetBannerType="none"
           offline={false}
+          username="foo"
+        />
+      </Kb.Box2>
+    ))
+    .add('public', () => (
+      <Kb.Box2 direction="horizontal" fullWidth={true} fullHeight={true}>
+        <Folder
+          path={Types.stringToPath('/keybase/public/foo')}
+          routePath={I.List([])}
+          shouldShowSFMIBanner={false}
+          resetBannerType="none"
+          offline={false}
+          username="foo"
         />
       </Kb.Box2>
     ))
@@ -43,6 +56,7 @@ export default () => {
           shouldShowSFMIBanner={true}
           resetBannerType="none"
           offline={false}
+          username="foo"
         />
       </Kb.Box2>
     ))
@@ -54,6 +68,7 @@ export default () => {
           shouldShowSFMIBanner={false}
           resetBannerType="self"
           offline={false}
+          username="foo"
         />
       </Kb.Box2>
     ))
@@ -65,6 +80,7 @@ export default () => {
           shouldShowSFMIBanner={false}
           resetBannerType={1}
           offline={false}
+          username="foo"
         />
       </Kb.Box2>
     ))
@@ -76,6 +92,7 @@ export default () => {
           shouldShowSFMIBanner={false}
           resetBannerType="none"
           offline={true}
+          username="foo"
         />
       </Kb.Box2>
     ))

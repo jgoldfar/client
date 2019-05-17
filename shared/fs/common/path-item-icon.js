@@ -103,16 +103,17 @@ const IconOnly = (props: Props) => {
   const iconPathType = props.type === 'folder' ? 'folder' : 'file'
   switch (parsedPath.kind) {
     case 'group-tlf':
-      const usernames = parsedPath.writers.concat(parsedPath.readers)
-      return (
-        <Kb.Avatar
-          size={getIconSize(props.size)}
-          username={usernames.find(w => w !== props.username) || usernames.first()}
-        />
-      )
+      if (parsedPath.tlfType === 'public') {
+        return <Kb.Icon type={icons.tlfList.public[getIconSizeString(props.size)]} />
+      } else {
+        return <Kb.Icon type={icons.folder[getIconSizeString(props.size)]} />
+      }
     case 'team-tlf':
       return <Kb.Avatar size={getIconSize(props.size)} teamname={parsedPath.team} isTeam={true} />
     case 'in-group-tlf':
+      if (parsedPath.tlfType === 'public' && props.type === 'folder') {
+        return <Kb.Icon type={icons.tlfList.public[getIconSizeString(props.size)]} />
+      }
       return <Kb.Icon type={icons[iconPathType][getIconSizeString(props.size)]} />
     case 'in-team-tlf':
       return <Kb.Icon type={icons[iconPathType][getIconSizeString(props.size)]} />
