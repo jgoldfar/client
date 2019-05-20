@@ -732,4 +732,8 @@ protocol local {
   TransactionID approveTxURILocal(int sessionID, string inputURI);
   TransactionID approvePayURILocal(int sessionID, string inputURI, string amount, boolean fromCLI);
   TransactionID approvePathURILocal(int sessionID, string inputURI, PaymentPath fullPath, boolean fromCLI);
+
+  // Signs arbitrary Stellar transaction. If no AccountID is provided, it's derived
+  // from the transaction's source account.
+  string signTransactionXdrLocal(int sessionID, string envelopeXdr, union { null, AccountID } accountID);
 }

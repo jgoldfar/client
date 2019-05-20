@@ -15,6 +15,7 @@ import (
 	"github.com/keybase/client/go/stellar/remote"
 	"github.com/keybase/client/go/stellar/stellarcommon"
 	"github.com/keybase/stellarnet"
+	"github.com/stellar/go/xdr"
 )
 
 const WorthCurrencyErrorCode = "ERR"
@@ -1200,4 +1201,58 @@ func (s *Server) FindPaymentPathLocal(ctx context.Context, arg stellar1.FindPaym
 	// TODO: need sourceDisplay, sourceMaxDisplay, destinationDisplay (waiting on design)
 
 	return res, nil
+}
+
+func unpackTx(envelopeXdr string) (unpackedTx xdr.TransactionEnvelope, txIDPrecalc string, err error) {
+	err = xdr.SafeUnmarshalBase64(envelopeXdr, &unpackedTx)
+	if err != nil {
+		return unpackedTx, txIDPrecalc, fmt.Errorf("decoding tx: %v", err)
+	}
+	txIDPrecalc, err = stellarnet.HashTx(unpackedTx.Tx)
+	return unpackedTx, txIDPrecalc, err
+}
+
+func (s *Server) SignTransactionXdrLocal(ctx context.Context, arg stellar1.SignTransactionXdrLocalArg) (res string, err error) {
+	mctx, fin, err := s.Preamble(ctx, preambleArg{
+		RPCName:       "SignTransactionXdrLocal",
+		Err:           &err,
+		RequireWallet: true,
+	})
+	defer fin()
+	if err != nil {
+		return "", err
+	}
+
+	unpackedTx, _, err := unpackTx(arg.EnvelopeXdr)
+	if err != nil {
+		return "", err
+	}
+
+	var accountID stellar1.AccountID
+	if arg.AccountID == nil {
+		// Derive signer account id from transaction's sourceAccount.
+		accountID = stellar1.AccountID(unpackedTx.Tx.SourceAccount.Address())
+		mctx.Debug("Trying to sign with SourceAccount: %s", accountID.String())
+	} else {
+		// We were provided with specific AccountID we want to sign with.
+		accountID = *arg.AccountID
+		mctx.Debug("Trying to sign with (passed as argument): %s", accountID.String())
+	}
+
+	_, accBundle, err := stellar.LookupSender(mctx, accountID)
+	if err != nil {
+		return "", err
+	}
+
+	senderSeed, err := stellarnet.NewSeedStr(accBundle.Signers[0].SecureNoLogString())
+	if err != nil {
+		return "", err
+	}
+
+	signRes, err := stellarnet.SignEnvelope(senderSeed, unpackedTx)
+	if err != nil {
+		return "", err
+	}
+
+	return signRes.Signed, nil
 }

@@ -1486,6 +1486,12 @@ type ApprovePathURILocalArg struct {
 	FromCLI   bool        `codec:"fromCLI" json:"fromCLI"`
 }
 
+type SignTransactionXdrLocalArg struct {
+	SessionID   int        `codec:"sessionID" json:"sessionID"`
+	EnvelopeXdr string     `codec:"envelopeXdr" json:"envelopeXdr"`
+	AccountID   *AccountID `codec:"accountID,omitempty" json:"accountID,omitempty"`
+}
+
 type LocalInterface interface {
 	GetWalletAccountsLocal(context.Context, int) ([]WalletAccountLocal, error)
 	GetWalletAccountLocal(context.Context, GetWalletAccountLocalArg) (WalletAccountLocal, error)
@@ -1559,6 +1565,7 @@ type LocalInterface interface {
 	ApproveTxURILocal(context.Context, ApproveTxURILocalArg) (TransactionID, error)
 	ApprovePayURILocal(context.Context, ApprovePayURILocalArg) (TransactionID, error)
 	ApprovePathURILocal(context.Context, ApprovePathURILocalArg) (TransactionID, error)
+	SignTransactionXdrLocal(context.Context, SignTransactionXdrLocalArg) (string, error)
 }
 
 func LocalProtocol(i LocalInterface) rpc.Protocol {
@@ -2625,6 +2632,21 @@ func LocalProtocol(i LocalInterface) rpc.Protocol {
 					return
 				},
 			},
+			"signTransactionXdrLocal": {
+				MakeArg: func() interface{} {
+					var ret [1]SignTransactionXdrLocalArg
+					return &ret
+				},
+				Handler: func(ctx context.Context, args interface{}) (ret interface{}, err error) {
+					typedArgs, ok := args.(*[1]SignTransactionXdrLocalArg)
+					if !ok {
+						err = rpc.NewTypeError((*[1]SignTransactionXdrLocalArg)(nil), args)
+						return
+					}
+					ret, err = i.SignTransactionXdrLocal(ctx, typedArgs[0])
+					return
+				},
+			},
 		},
 	}
 }
@@ -3005,5 +3027,10 @@ func (c LocalClient) ApprovePayURILocal(ctx context.Context, __arg ApprovePayURI
 
 func (c LocalClient) ApprovePathURILocal(ctx context.Context, __arg ApprovePathURILocalArg) (res TransactionID, err error) {
 	err = c.Cli.Call(ctx, "stellar.1.local.approvePathURILocal", []interface{}{__arg}, &res)
+	return
+}
+
+func (c LocalClient) SignTransactionXdrLocal(ctx context.Context, __arg SignTransactionXdrLocalArg) (res string, err error) {
+	err = c.Cli.Call(ctx, "stellar.1.local.signTransactionXdrLocal", []interface{}{__arg}, &res)
 	return
 }

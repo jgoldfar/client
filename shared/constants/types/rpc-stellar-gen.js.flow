@@ -565,6 +565,7 @@ declare export function localValidateSecretKeyLocalRpcPromise(params: $PropertyT
 // 'stellar.1.local.approveTxURILocal'
 // 'stellar.1.local.approvePayURILocal'
 // 'stellar.1.local.approvePathURILocal'
+// 'stellar.1.local.signTransactionXdrLocal'
 // 'stellar.1.notify.paymentNotification'
 // 'stellar.1.notify.paymentStatusNotification'
 // 'stellar.1.notify.requestStatusNotification'

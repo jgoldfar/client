@@ -2506,6 +2506,26 @@
         }
       ],
       "response": "TransactionID"
+    },
+    "signTransactionXdrLocal": {
+      "request": [
+        {
+          "name": "sessionID",
+          "type": "int"
+        },
+        {
+          "name": "envelopeXdr",
+          "type": "string"
+        },
+        {
+          "name": "accountID",
+          "type": [
+            null,
+            "AccountID"
+          ]
+        }
+      ],
+      "response": "string"
     }
   },
   "namespace": "stellar.1"
