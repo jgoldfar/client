@@ -316,6 +316,7 @@ const load = () =>
             onOpen={Sb.action('onOpen')}
             onAction={Sb.action('onAction')}
             routePath={I.List([])}
+            usernames={I.List(['bob', 'charlie'])}
           />
         </WrapRow>
         <WrapRow key="20">
@@ -328,18 +329,20 @@ const load = () =>
             onOpen={Sb.action('onOpen')}
             onAction={Sb.action('onAction')}
             routePath={I.List([])}
+            usernames={I.List(['bob', 'charlie'])}
           />
         </WrapRow>
         <WrapRow key="21">
           <TlfRow
-            name="alice,bob,charlie"
-            path={Types.stringToPath('/keybase/private/alice,bob,charlie')}
+            name="alice,bob,charlie,david,eve,felicity,george"
+            path={Types.stringToPath('/keybase/private/alice,bob,charlie,david,eve,felicity,george')}
             needsRekey={false}
             isIgnored={false}
             isNew={true}
             onOpen={Sb.action('onOpen')}
             onAction={Sb.action('onAction')}
             routePath={I.List([])}
+            usernames={I.List(['bob', 'charlie', 'david', 'eve', 'felicity', 'george'])}
           />
         </WrapRow>
       </Box>
