@@ -11,7 +11,6 @@ import Rows from '../row/rows-container'
 import {asRows as sfmiBannerAsRows} from '../banner/system-file-manager-integration-banner/container'
 import {asRows as resetBannerAsRows} from '../banner/reset-banner/container'
 import OfflineFolder from './offline'
-import * as Constants from '../../constants/fs'
 import PublicReminder from '../banner/public-reminder'
 
 type Props = {|
@@ -20,13 +19,14 @@ type Props = {|
   routePath: I.List<string>,
   shouldShowSFMIBanner: boolean,
   resetBannerType: Types.ResetBannerType,
+  showPublicReminder: boolean,
   offline: boolean,
   username: string,
 |}
 
 const WithContent = (props: Props) => (
   <Kb.Box2 direction="vertical" fullWidth={true} style={styles.contentContainer}>
-    {Constants.isOwnPublic(props.path, props.username) && <PublicReminder path={props.path} />}
+    {props.showPublicReminder && <PublicReminder path={props.path} />}
     {/* this extra box is necessary to avoid Kb.DragAndDrop (which is fullHeight) pushes other stuff over */}
     <Kb.DragAndDrop allowFolders={true} onAttach={props.onAttach}>
       <Rows

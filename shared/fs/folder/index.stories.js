@@ -30,6 +30,7 @@ export default () => {
           path={Types.stringToPath('/keybase/private/foo')}
           routePath={I.List([])}
           shouldShowSFMIBanner={false}
+          showPublicReminder={false}
           resetBannerType="none"
           offline={false}
           username="foo"
@@ -42,6 +43,7 @@ export default () => {
           path={Types.stringToPath('/keybase/public/foo')}
           routePath={I.List([])}
           shouldShowSFMIBanner={false}
+          showPublicReminder={true}
           resetBannerType="none"
           offline={false}
           username="foo"
@@ -56,6 +58,7 @@ export default () => {
           shouldShowSFMIBanner={true}
           resetBannerType="none"
           offline={false}
+          showPublicReminder={false}
           username="foo"
         />
       </Kb.Box2>
@@ -65,6 +68,7 @@ export default () => {
         <Folder
           path={Types.stringToPath('/keybase/private/me,reset')}
           routePath={I.List([])}
+          showPublicReminder={false}
           shouldShowSFMIBanner={false}
           resetBannerType="self"
           offline={false}
@@ -77,6 +81,7 @@ export default () => {
         <Folder
           path={Types.stringToPath('/keybase/private/others,reset')}
           routePath={I.List([])}
+          showPublicReminder={false}
           shouldShowSFMIBanner={false}
           resetBannerType={1}
           offline={false}
@@ -89,6 +94,7 @@ export default () => {
         <Folder
           path={Types.stringToPath('/keybase/private/others,reset')}
           routePath={I.List([])}
+          showPublicReminder={false}
           shouldShowSFMIBanner={false}
           resetBannerType="none"
           offline={true}

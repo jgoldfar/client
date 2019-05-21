@@ -27,6 +27,7 @@ const mergeProps = (stateProps, dispatchProps, {path, routePath}) => ({
   resetBannerType: stateProps.resetBannerType,
   routePath,
   shouldShowSFMIBanner: stateProps.shouldShowSFMIBanner,
+  showPublicReminder: Constants.isOwnPublic(path, stateProps._pathItem),
   username: stateProps.username,
 })
 
