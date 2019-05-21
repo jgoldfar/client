@@ -149,7 +149,7 @@ Connected.navigationOptions = ({navigation}: {navigation: any}) => {
           header: (
             <MobileHeader path={path} onBack={navigation.isFirstRouteInParent() ? null : navigation.pop} />
           ),
-          headerHeight: mobileHeaderHeight,
+          headerHeight: mobileHeaderHeight(path),
         }
     : {
         header: undefined,
