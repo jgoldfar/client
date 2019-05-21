@@ -1,7 +1,9 @@
 package stellarsvc
 
 import (
+	"bytes"
 	"context"
+	"encoding/base64"
 	"fmt"
 	"regexp"
 	"sort"
@@ -18,6 +20,7 @@ import (
 	"github.com/keybase/client/go/stellar"
 	"github.com/keybase/client/go/stellar/remote"
 	"github.com/keybase/stellarnet"
+	"github.com/stellar/go/xdr"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -2905,6 +2908,83 @@ func TestManageTrustlinesErrors(t *testing.T) {
 		Trustline: trustlineArg,
 	})
 	require.Error(t, err)
+}
+
+func TestSignTransactionXdr(t *testing.T) {
+	tcs, cleanup := setupNTests(t, 2)
+	defer cleanup()
+
+	acceptDisclaimer(tcs[0])
+	accounts := tcs[0].Backend.ImportAccountsForUser(tcs[0])
+	acceptDisclaimer(tcs[1])
+	accounts2 := tcs[1].Backend.ImportAccountsForUser(tcs[1])
+
+	sp, unlock := stellar.NewSeqnoProvider(tcs[0].MetaContext(), tcs[0].Srv.walletState)
+	defer unlock()
+	tx := stellarnet.NewBaseTx(stellarnet.AddressStr(accounts[0].accountID), sp, 100)
+	tx.AddPaymentOp(stellarnet.AddressStr(accounts[0].accountID), "100")
+	tx.AddMemoText("test")
+	signRes, err := tx.Sign(stellarnet.SeedStr(accounts[0].secretKey))
+	require.NoError(t, err)
+
+	// Unpack transaction, strip signatures. We will try to resign
+	// that transaction using SignTransactionXdrLocal and are hoping
+	// to see the same result.
+	unpacked, _, err := unpackTx(signRes.Signed)
+	require.NoError(t, err)
+
+	var buf bytes.Buffer
+	unpacked.Signatures = []xdr.DecoratedSignature{}
+	_, err = xdr.Marshal(&buf, unpacked)
+	require.NoError(t, err)
+	unsigned := base64.StdEncoding.EncodeToString(buf.Bytes())
+
+	// Happy path.
+	signed, err := tcs[0].Srv.SignTransactionXdrLocal(context.Background(), stellar1.SignTransactionXdrLocalArg{
+		EnvelopeXdr: unsigned,
+	})
+	require.NoError(t, err)
+	// Signed result should match stellarnet result from before we stipped
+	// signatures.
+	require.Equal(t, signRes.Signed, signed)
+
+	// Try with account id user doesn't own.
+	invalidAccID, _ := randomStellarKeypair()
+	signed, err = tcs[0].Srv.SignTransactionXdrLocal(context.Background(), stellar1.SignTransactionXdrLocalArg{
+		EnvelopeXdr: unsigned,
+		AccountID:   &invalidAccID,
+	})
+	require.Empty(t, signed)
+	require.Error(t, err)
+
+	// Same, but the SourceAccount is one that user doesn't own.
+	signed, err = tcs[1].Srv.SignTransactionXdrLocal(context.Background(), stellar1.SignTransactionXdrLocalArg{
+		EnvelopeXdr: unsigned,
+	})
+	require.Empty(t, signed)
+	require.Error(t, err)
+
+	// Can, however, sign with non-default account ID that user owns.
+	accID2 := accounts2[0].accountID
+	signed, err = tcs[1].Srv.SignTransactionXdrLocal(context.Background(), stellar1.SignTransactionXdrLocalArg{
+		EnvelopeXdr: unsigned,
+		AccountID:   &accID2,
+	})
+	require.NoError(t, err)
+}
+
+func TestSignTransactionXdrBadEnvelope(t *testing.T) {
+	tcs, cleanup := setupNTests(t, 1)
+	defer cleanup()
+
+	acceptDisclaimer(tcs[0])
+
+	envelope := "AAAAAJHtRFG9qD+hsTVmp0/1ZPWkxQj/F4217ia3nVY+dPHjAAAAZAAAAAACd"
+	signed, err := tcs[0].Srv.SignTransactionXdrLocal(context.Background(), stellar1.SignTransactionXdrLocalArg{
+		EnvelopeXdr: envelope,
+	})
+	require.Error(t, err)
+	require.Empty(t, signed)
 }
 
 type chatListener struct {
