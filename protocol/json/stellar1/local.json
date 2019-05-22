@@ -1308,6 +1308,20 @@
           "name": "memoType"
         }
       ]
+    },
+    {
+      "type": "record",
+      "name": "SignXdrResult",
+      "fields": [
+        {
+          "type": "string",
+          "name": "singedTx"
+        },
+        {
+          "type": "AccountID",
+          "name": "accountID"
+        }
+      ]
     }
   ],
   "messages": {
@@ -2525,7 +2539,7 @@
           ]
         }
       ],
-      "response": "string"
+      "response": "SignXdrResult"
     }
   },
   "namespace": "stellar.1"

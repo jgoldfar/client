@@ -2940,37 +2940,41 @@ func TestSignTransactionXdr(t *testing.T) {
 	unsigned := base64.StdEncoding.EncodeToString(buf.Bytes())
 
 	// Happy path.
-	signed, err := tcs[0].Srv.SignTransactionXdrLocal(context.Background(), stellar1.SignTransactionXdrLocalArg{
+	res, err := tcs[0].Srv.SignTransactionXdrLocal(context.Background(), stellar1.SignTransactionXdrLocalArg{
 		EnvelopeXdr: unsigned,
 	})
 	require.NoError(t, err)
-	// Signed result should match stellarnet result from before we stipped
-	// signatures.
-	require.Equal(t, signRes.Signed, signed)
+	require.Equal(t, accounts[0].accountID, res.AccountID)
+	// Signed result should match stellarnet result from before we stipped signatures.
+	require.Equal(t, signRes.Signed, res.SingedTx)
+
+	var emptyResult stellar1.SignXdrResult
 
 	// Try with account id user doesn't own.
 	invalidAccID, _ := randomStellarKeypair()
-	signed, err = tcs[0].Srv.SignTransactionXdrLocal(context.Background(), stellar1.SignTransactionXdrLocalArg{
+	res, err = tcs[0].Srv.SignTransactionXdrLocal(context.Background(), stellar1.SignTransactionXdrLocalArg{
 		EnvelopeXdr: unsigned,
 		AccountID:   &invalidAccID,
 	})
-	require.Empty(t, signed)
+	require.Equal(t, emptyResult, res)
 	require.Error(t, err)
 
 	// Same, but the SourceAccount is one that user doesn't own.
-	signed, err = tcs[1].Srv.SignTransactionXdrLocal(context.Background(), stellar1.SignTransactionXdrLocalArg{
+	res, err = tcs[1].Srv.SignTransactionXdrLocal(context.Background(), stellar1.SignTransactionXdrLocalArg{
 		EnvelopeXdr: unsigned,
 	})
-	require.Empty(t, signed)
+	require.Equal(t, emptyResult, res)
 	require.Error(t, err)
 
 	// Can, however, sign with non-default account ID that user owns.
 	accID2 := accounts2[0].accountID
-	signed, err = tcs[1].Srv.SignTransactionXdrLocal(context.Background(), stellar1.SignTransactionXdrLocalArg{
+	res, err = tcs[1].Srv.SignTransactionXdrLocal(context.Background(), stellar1.SignTransactionXdrLocalArg{
 		EnvelopeXdr: unsigned,
 		AccountID:   &accID2,
 	})
 	require.NoError(t, err)
+	require.Equal(t, res.AccountID, accID2)
+	require.NotEmpty(t, res.SingedTx)
 }
 
 func TestSignTransactionXdrBadEnvelope(t *testing.T) {
@@ -2980,11 +2984,11 @@ func TestSignTransactionXdrBadEnvelope(t *testing.T) {
 	acceptDisclaimer(tcs[0])
 
 	envelope := "AAAAAJHtRFG9qD+hsTVmp0/1ZPWkxQj/F4217ia3nVY+dPHjAAAAZAAAAAACd"
-	signed, err := tcs[0].Srv.SignTransactionXdrLocal(context.Background(), stellar1.SignTransactionXdrLocalArg{
+	res, err := tcs[0].Srv.SignTransactionXdrLocal(context.Background(), stellar1.SignTransactionXdrLocalArg{
 		EnvelopeXdr: envelope,
 	})
 	require.Error(t, err)
-	require.Empty(t, signed)
+	require.Equal(t, stellar1.SignXdrResult{}, res)
 }
 
 type chatListener struct {

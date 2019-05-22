@@ -735,5 +735,9 @@ protocol local {
 
   // Signs arbitrary Stellar transaction. If no AccountID is provided, it's derived
   // from the transaction's source account.
-  string signTransactionXdrLocal(int sessionID, string envelopeXdr, union { null, AccountID } accountID);
+  record SignXdrResult {
+    string singedTx;
+    AccountID accountID;
+  }
+  SignXdrResult signTransactionXdrLocal(int sessionID, string envelopeXdr, union { null, AccountID } accountID);
 }

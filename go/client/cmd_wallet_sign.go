@@ -4,6 +4,9 @@
 package client
 
 import (
+	"io/ioutil"
+	"os"
+
 	"github.com/keybase/cli"
 	"github.com/keybase/client/go/libcmdline"
 	"github.com/keybase/client/go/libkb"
@@ -54,6 +57,14 @@ func (c *CmdWalletSign) Run() (err error) {
 		return err
 	}
 
+	if c.XDR == "" {
+		bytes, err := ioutil.ReadAll(os.Stdin)
+		if err != nil {
+			return err
+		}
+		c.XDR = string(bytes)
+	}
+
 	var maybeAccount *stellar1.AccountID
 	if !c.AccountID.IsNil() {
 		maybeAccount = &c.AccountID
@@ -66,7 +77,9 @@ func (c *CmdWalletSign) Run() (err error) {
 	if err != nil {
 		return err
 	}
-	c.G().UI.GetDumbOutputUI().Printf("%s\n", res)
+	ui := c.G().UI.GetDumbOutputUI()
+	ui.PrintfStderr(ColorString(c.G(), "green", "Signing with account ID: %s\n", res.AccountID.String()))
+	ui.Printf("%s\n", res.SingedTx)
 	return nil
 }
 

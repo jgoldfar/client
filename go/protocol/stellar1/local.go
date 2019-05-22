@@ -1079,6 +1079,18 @@ func (o ValidateStellarURIResultLocal) DeepCopy() ValidateStellarURIResultLocal 
 	}
 }
 
+type SignXdrResult struct {
+	SingedTx  string    `codec:"singedTx" json:"singedTx"`
+	AccountID AccountID `codec:"accountID" json:"accountID"`
+}
+
+func (o SignXdrResult) DeepCopy() SignXdrResult {
+	return SignXdrResult{
+		SingedTx:  o.SingedTx,
+		AccountID: o.AccountID.DeepCopy(),
+	}
+}
+
 type GetWalletAccountsLocalArg struct {
 	SessionID int `codec:"sessionID" json:"sessionID"`
 }
@@ -1565,7 +1577,7 @@ type LocalInterface interface {
 	ApproveTxURILocal(context.Context, ApproveTxURILocalArg) (TransactionID, error)
 	ApprovePayURILocal(context.Context, ApprovePayURILocalArg) (TransactionID, error)
 	ApprovePathURILocal(context.Context, ApprovePathURILocalArg) (TransactionID, error)
-	SignTransactionXdrLocal(context.Context, SignTransactionXdrLocalArg) (string, error)
+	SignTransactionXdrLocal(context.Context, SignTransactionXdrLocalArg) (SignXdrResult, error)
 }
 
 func LocalProtocol(i LocalInterface) rpc.Protocol {
@@ -3030,7 +3042,7 @@ func (c LocalClient) ApprovePathURILocal(ctx context.Context, __arg ApprovePathU
 	return
 }
 
-func (c LocalClient) SignTransactionXdrLocal(ctx context.Context, __arg SignTransactionXdrLocalArg) (res string, err error) {
+func (c LocalClient) SignTransactionXdrLocal(ctx context.Context, __arg SignTransactionXdrLocalArg) (res SignXdrResult, err error) {
 	err = c.Cli.Call(ctx, "stellar.1.local.signTransactionXdrLocal", []interface{}{__arg}, &res)
 	return
 }

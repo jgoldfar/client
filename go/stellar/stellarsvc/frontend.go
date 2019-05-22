@@ -1212,7 +1212,7 @@ func unpackTx(envelopeXdr string) (unpackedTx xdr.TransactionEnvelope, txIDPreca
 	return unpackedTx, txIDPrecalc, err
 }
 
-func (s *Server) SignTransactionXdrLocal(ctx context.Context, arg stellar1.SignTransactionXdrLocalArg) (res string, err error) {
+func (s *Server) SignTransactionXdrLocal(ctx context.Context, arg stellar1.SignTransactionXdrLocalArg) (res stellar1.SignXdrResult, err error) {
 	mctx, fin, err := s.Preamble(ctx, preambleArg{
 		RPCName:       "SignTransactionXdrLocal",
 		Err:           &err,
@@ -1220,12 +1220,12 @@ func (s *Server) SignTransactionXdrLocal(ctx context.Context, arg stellar1.SignT
 	})
 	defer fin()
 	if err != nil {
-		return "", err
+		return res, err
 	}
 
 	unpackedTx, _, err := unpackTx(arg.EnvelopeXdr)
 	if err != nil {
-		return "", err
+		return res, err
 	}
 
 	var accountID stellar1.AccountID
@@ -1241,18 +1241,20 @@ func (s *Server) SignTransactionXdrLocal(ctx context.Context, arg stellar1.SignT
 
 	_, accBundle, err := stellar.LookupSender(mctx, accountID)
 	if err != nil {
-		return "", err
+		return res, err
 	}
 
 	senderSeed, err := stellarnet.NewSeedStr(accBundle.Signers[0].SecureNoLogString())
 	if err != nil {
-		return "", err
+		return res, err
 	}
 
 	signRes, err := stellarnet.SignEnvelope(senderSeed, unpackedTx)
 	if err != nil {
-		return "", err
+		return res, err
 	}
 
-	return signRes.Signed, nil
+	res.SingedTx = signRes.Signed
+	res.AccountID = accountID
+	return res, nil
 }
